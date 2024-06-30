@@ -30,7 +30,8 @@
     "vscode": {
       "extensions": [
         "streetsidesoftware.code-spell-checker",
-        "mhutchie.git-graph"
+        "mhutchie.git-graph",
+        "DavidAnson.vscode-markdownlint"
       ]
     }
   }

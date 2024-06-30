@@ -64,27 +64,28 @@ aspects of contributing to PyTorch.
 <!-- tocstop -->
 
 ## Developing PyTorch
+
 Follow the instructions for [installing PyTorch from source](https://github.com/pytorch/pytorch#from-source). If you get stuck when developing PyTorch on your machine, check out the [tips and debugging](#tips-and-debugging) section below for common solutions.
 
 ### Tips and Debugging
 
-* If you want to have no-op incremental rebuilds (which are fast), see [Make no-op build fast](#make-no-op-build-fast) below.
+- If you want to have no-op incremental rebuilds (which are fast), see [Make no-op build fast](#make-no-op-build-fast) below.
 
-* When installing with `python setup.py develop` (in contrast to `python setup.py install`) Python runtime will use
+- When installing with `python setup.py develop` (in contrast to `python setup.py install`) Python runtime will use
   the current local source-tree when importing `torch` package. (This is done by creating [`.egg-link`](https://wiki.python.org/moin/PythonPackagingTerminology#egg-link) file in `site-packages` folder)
   This way you do not need to repeatedly install after modifying Python files (`.py`).
   However, you would need to reinstall if you modify Python interface (`.pyi`, `.pyi.in`) or
    non-Python files (`.cpp`, `.cc`, `.cu`, `.h`, ...).
 
-
   One way to avoid running `python setup.py develop` every time one makes a change to C++/CUDA/ObjectiveC files on Linux/Mac,
   is to create a symbolic link from `build` folder to `torch/lib`, for example, by issuing following:
+
   ```bash
    pushd torch/lib; sh -c "ln -sf ../../build/lib/libtorch_cpu.* ."; popd
   ```
+
    Afterwards rebuilding a library (for example to rebuild `libtorch_cpu.so` issue `ninja torch_cpu` from `build` folder),
    would be sufficient to make change visible in `torch` package.
-
 
   To reinstall, first uninstall all existing PyTorch installs. You may need to run `pip
   uninstall torch` multiple times. You'll know `torch` is fully
@@ -100,12 +101,12 @@ Follow the instructions for [installing PyTorch from source](https://github.com/
 
   Next run `python setup.py clean`. After that, you can install in `develop` mode again.
 
-* If a commit is simple and doesn't affect any code (keep in mind that some docstrings contain code
+- If a commit is simple and doesn't affect any code (keep in mind that some docstrings contain code
   that is used in tests), you can add `[skip ci]` (case sensitive) somewhere in your commit message to
   [skip all build / test steps](https://github.blog/changelog/2021-02-08-github-actions-skip-pull-request-and-push-workflows-with-skip-ci/).
   Note that changing the pull request body or title on GitHub itself has no effect.
 
-* If you run into errors when running `python setup.py develop`, here are some debugging steps:
+- If you run into errors when running `python setup.py develop`, here are some debugging steps:
   1. Run `printf '#include <stdio.h>\nint main() { printf("Hello World");}'|clang -x c -; ./a.out` to make sure
   your CMake works and can compile this simple Hello World program without errors.
   2. Nuke your `build` directory. The `setup.py` script compiles binaries into the `build` folder and caches many
@@ -113,6 +114,7 @@ Follow the instructions for [installing PyTorch from source](https://github.com/
   `rm -rf build` from the toplevel `pytorch` directory and start over.
   3. If you have made edits to the PyTorch repo, commit any change you'd like to keep and clean the repo with the
   following commands (note that clean _really_ removes all untracked files and changes.):
+
       ```bash
       git submodule deinit -f .
       git clean -xdf
@@ -120,37 +122,46 @@ Follow the instructions for [installing PyTorch from source](https://github.com/
       git submodule update --init --recursive # very important to sync the submodules
       python setup.py develop                 # then try running the command again
       ```
+
   4. The main step within `python setup.py develop` is running `make` from the `build` directory. If you want to
     experiment with some environment variables, you can pass them into the command:
+
       ```bash
       ENV_KEY1=ENV_VAL1[, ENV_KEY2=ENV_VAL2]* python setup.py develop
       ```
 
-* If you run into issue running `git submodule update --init --recursive`. Please try the following:
+- If you run into issue running `git submodule update --init --recursive`. Please try the following:
   - If you encounter an error such as
-    ```
+
+    ```output
     error: Submodule 'third_party/pybind11' could not be updated
     ```
+
     check whether your Git local or global config file contains any `submodule.*` settings. If yes, remove them and try again.
     (please reference [this doc](https://git-scm.com/docs/git-config#Documentation/git-config.txt-submoduleltnamegturl) for more info).
 
   - If you encounter an error such as
-    ```
+
+    ```output
     fatal: unable to access 'https://github.com/pybind11/pybind11.git': could not load PEM client certificate ...
     ```
+
     this is likely that you are using HTTP proxying and the certificate expired. To check if the certificate is valid, run
     `git config --global --list` and search for config like `http.proxysslcert=<cert_file>`. Then check certificate valid date by running
+
     ```bash
     openssl x509 -noout -in <cert_file> -dates
     ```
 
   - If you encounter an error that some third_party modules are not checked out correctly, such as
-    ```
+
+    ```output
     Could not find .../pytorch/third_party/pybind11/CMakeLists.txt
     ```
+
     remove any `submodule.*` settings in your local git config (`.git/config` of your pytorch repo) and try again.
-* If you're a Windows contributor, please check out [Best Practices](https://github.com/pytorch/pytorch/wiki/Best-Practices-to-Edit-and-Compile-Pytorch-Source-Code-On-Windows).
-* For help with any part of the contributing process, please don’t hesitate to utilize our Zoom office hours! See details [here](https://github.com/pytorch/pytorch/wiki/Dev-Infra-Office-Hours)
+- If you're a Windows contributor, please check out [Best Practices](https://github.com/pytorch/pytorch/wiki/Best-Practices-to-Edit-and-Compile-Pytorch-Source-Code-On-Windows).
+- For help with any part of the contributing process, please don’t hesitate to utilize our Zoom office hours! See details [here](https://github.com/pytorch/pytorch/wiki/Dev-Infra-Office-Hours)
 
 ## Nightly Checkout & Pull
 
@@ -187,77 +198,77 @@ into the repo directory.
 
 ## Codebase structure
 
-* [c10](c10) - Core library files that work everywhere, both server
+- [c10](c10) - Core library files that work everywhere, both server
   and mobile. We are slowly moving pieces from [ATen/core](aten/src/ATen/core)
   here. This library is intended only to contain essential functionality,
   and appropriate to use in settings where binary size matters. (But
   you'll have a lot of missing functionality if you try to use it
   directly.)
-* [aten](aten) - C++ tensor library for PyTorch (no autograd support)
-  * [src](aten/src) - [README](aten/src/README.md)
-    * [ATen](aten/src/ATen)
-      * [core](aten/src/ATen/core) - Core functionality of ATen. This
+- [aten](aten) - C++ tensor library for PyTorch (no autograd support)
+  - [src](aten/src) - [README](aten/src/README.md)
+    - [ATen](aten/src/ATen)
+      - [core](aten/src/ATen/core) - Core functionality of ATen. This
         is migrating to top-level c10 folder.
-      * [native](aten/src/ATen/native) - Modern implementations of
+      - [native](aten/src/ATen/native) - Modern implementations of
         operators. If you want to write a new operator, here is where
         it should go. Most CPU operators go in the top level directory,
         except for operators which need to be compiled specially; see
         cpu below.
-        * [cpu](aten/src/ATen/native/cpu) - Not actually CPU
+        - [cpu](aten/src/ATen/native/cpu) - Not actually CPU
           implementations of operators, but specifically implementations
           which are compiled with processor-specific instructions, like
           AVX. See the [README](aten/src/ATen/native/cpu/README.md) for more
           details.
-        * [cuda](aten/src/ATen/native/cuda) - CUDA implementations of
+        - [cuda](aten/src/ATen/native/cuda) - CUDA implementations of
           operators.
-        * [sparse](aten/src/ATen/native/sparse) - CPU and CUDA
+        - [sparse](aten/src/ATen/native/sparse) - CPU and CUDA
           implementations of COO sparse tensor operations
-        * [mkl](aten/src/ATen/native/mkl) [mkldnn](aten/src/ATen/native/mkldnn)
+        - [mkl](aten/src/ATen/native/mkl) [mkldnn](aten/src/ATen/native/mkldnn)
           [miopen](aten/src/ATen/native/miopen) [cudnn](aten/src/ATen/native/cudnn)
           - implementations of operators which simply bind to some
             backend library.
-        * [quantized](aten/src/ATen/native/quantized/) - Quantized tensor (i.e. QTensor) operation implementations. [README](aten/src/ATen/native/quantized/README.md) contains details including how to implement native quantized operations.
-* [torch](torch) - The actual PyTorch library. Everything that is not
+        - [quantized](aten/src/ATen/native/quantized/) - Quantized tensor (i.e. QTensor) operation implementations. [README](aten/src/ATen/native/quantized/README.md) contains details including how to implement native quantized operations.
+- [torch](torch) - The actual PyTorch library. Everything that is not
   in [csrc](torch/csrc) is a Python module, following the PyTorch Python
   frontend module structure.
-  * [csrc](torch/csrc) - C++ files composing the PyTorch library. Files
+  - [csrc](torch/csrc) - C++ files composing the PyTorch library. Files
     in this directory tree are a mix of Python binding code, and C++
     heavy lifting. Consult `setup.py` for the canonical list of Python
     binding files; conventionally, they are often prefixed with
     `python_`. [README](torch/csrc/README.md)
-    * [jit](torch/csrc/jit) - Compiler and frontend for TorchScript JIT
+    - [jit](torch/csrc/jit) - Compiler and frontend for TorchScript JIT
       frontend. [README](torch/csrc/jit/README.md)
-    * [autograd](torch/csrc/autograd) - Implementation of reverse-mode automatic differentiation. [README](torch/csrc/autograd/README.md)
-    * [api](torch/csrc/api) - The PyTorch C++ frontend.
-    * [distributed](torch/csrc/distributed) - Distributed training
+    - [autograd](torch/csrc/autograd) - Implementation of reverse-mode automatic differentiation. [README](torch/csrc/autograd/README.md)
+    - [api](torch/csrc/api) - The PyTorch C++ frontend.
+    - [distributed](torch/csrc/distributed) - Distributed training
       support for PyTorch.
-* [tools](tools) - Code generation scripts for the PyTorch library.
+- [tools](tools) - Code generation scripts for the PyTorch library.
   See [README](tools/README.md) of this directory for more details.
-* [test](test) - Python unit tests for PyTorch Python frontend.
-  * [test_torch.py](test/test_torch.py) - Basic tests for PyTorch
+- [test](test) - Python unit tests for PyTorch Python frontend.
+  - [test_torch.py](test/test_torch.py) - Basic tests for PyTorch
     functionality.
-  * [test_autograd.py](test/test_autograd.py) - Tests for non-NN
+  - [test_autograd.py](test/test_autograd.py) - Tests for non-NN
     automatic differentiation support.
-  * [test_nn.py](test/test_nn.py) - Tests for NN operators and
+  - [test_nn.py](test/test_nn.py) - Tests for NN operators and
     their automatic differentiation.
-  * [test_jit.py](test/test_jit.py) - Tests for the JIT compiler
+  - [test_jit.py](test/test_jit.py) - Tests for the JIT compiler
     and TorchScript.
-  * ...
-  * [cpp](test/cpp) - C++ unit tests for PyTorch C++ frontend.
-    * [api](test/cpp/api) - [README](test/cpp/api/README.md)
-    * [jit](test/cpp/jit) - [README](test/cpp/jit/README.md)
-    * [tensorexpr](test/cpp/tensorexpr) - [README](test/cpp/tensorexpr/README.md)
-  * [expect](test/expect) - Automatically generated "expect" files
+  - ...
+  - [cpp](test/cpp) - C++ unit tests for PyTorch C++ frontend.
+    - [api](test/cpp/api) - [README](test/cpp/api/README.md)
+    - [jit](test/cpp/jit) - [README](test/cpp/jit/README.md)
+    - [tensorexpr](test/cpp/tensorexpr) - [README](test/cpp/tensorexpr/README.md)
+  - [expect](test/expect) - Automatically generated "expect" files
     which are used to compare against expected output.
-  * [onnx](test/onnx) - Tests for ONNX export functionality,
+  - [onnx](test/onnx) - Tests for ONNX export functionality,
     using both PyTorch and Caffe2.
-* [caffe2](caffe2) - The Caffe2 library.
-  * [core](caffe2/core) - Core files of Caffe2, e.g., tensor, workspace,
+- [caffe2](caffe2) - The Caffe2 library.
+  - [core](caffe2/core) - Core files of Caffe2, e.g., tensor, workspace,
     blobs, etc.
-  * [operators](caffe2/operators) - Operators of Caffe2.
-  * [python](caffe2/python) - Python bindings to Caffe2.
-  * ...
-* [.circleci](.circleci) - CircleCI configuration management. [README](.circleci/README.md)
+  - [operators](caffe2/operators) - Operators of Caffe2.
+  - [python](caffe2/python) - Python bindings to Caffe2.
+  - ...
+- [.circleci](.circleci) - CircleCI configuration management. [README](.circleci/README.md)
 
 ## Unit testing
 
@@ -265,6 +276,7 @@ into the repo directory.
 
 **Prerequisites**:
 The following packages should be installed with either `conda` or `pip`:
+
 - `expecttest` and `hypothesis` - required to run tests
 - `mypy` - recommended for linting
 - `pytest` - recommended to run tests more selectively
@@ -364,7 +376,6 @@ is part of the test suite `ContainerAliasingTest` in the file
 ./build/bin/test_jit --gtest_filter=ContainerAliasingTest.MayContainAlias
 ```
 
-
 ### Run Specific CI Jobs
 
 You can generate a commit that limits the CI to only run a specific job by using
@@ -386,6 +397,7 @@ ghstack submit
 of very low signal to reviewers.
 
 ## Merging your Change
+
 If you know the right people or team that should approve your PR (and you have the required permissions to do so), add them to the Reviewers list.
 
 If not, leave the Reviewers section empty. Our triage squad will review your PR, add a module label, and assign it to the appropriate reviewer in a couple business days.  The reviewer will then look at your PR and respond.
@@ -400,6 +412,7 @@ Once your PR is approved, you can merge it in by entering a comment with the con
 
 So you want to write some documentation and don't know where to start?
 PyTorch has two main types of documentation:
+
 - **User facing documentation**:
 These are the docs that you see over at [our docs website](https://pytorch.org/docs).
 - **Developer facing documentation**:
@@ -412,43 +425,41 @@ The rest of this section is about user-facing documentation.
 PyTorch uses [Google style](https://www.sphinx-doc.org/en/master/usage/extensions/example_google.html)
 for formatting docstrings. Each line inside a docstrings block must be limited to 80 characters so that it fits into Jupyter documentation popups.
 
-
 ### Docstring type formatting
 
 In addition to the standard Google Style docstring formatting rules, the following guidelines should be followed for docstring types (docstring types are the type information contained in the round brackets after the variable name):
 
-* The "`Callable`", "`Any`", "`Iterable`", "`Iterator`", "`Generator`" types should have their first letter capitalized.
+- The "`Callable`", "`Any`", "`Iterable`", "`Iterator`", "`Generator`" types should have their first letter capitalized.
 
-* The "`list`" and "`tuple`" types should be completely lowercase.
+- The "`list`" and "`tuple`" types should be completely lowercase.
 
-* Types should not be made plural. For example: `tuple of int` should be used instead of `tuple of ints`.
+- Types should not be made plural. For example: `tuple of int` should be used instead of `tuple of ints`.
 
-* The only acceptable delimiter words for types are `or` and `of`. No other non-type words should be used other than `optional`.
+- The only acceptable delimiter words for types are `or` and `of`. No other non-type words should be used other than `optional`.
 
-* The word `optional` should only be used after the types, and it is only used if the user does not have to specify a value for the variable. Default values are listed after the variable description. Example:
+- The word `optional` should only be used after the types, and it is only used if the user does not have to specify a value for the variable. Default values are listed after the variable description. Example:
 
     ```
     my_var (int, optional): Variable description. Default: 1
     ```
 
-* Basic Python types should match their type name so that the [Intersphinx](https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html) extension can correctly identify them. For example:
-    * Use `str` instead of `string`.
-    * Use `bool` instead of `boolean`.
-    * Use `dict` instead of `dictionary`.
+- Basic Python types should match their type name so that the [Intersphinx](https://www.sphinx-doc.org/en/master/usage/extensions/intersphinx.html) extension can correctly identify them. For example:
+  - Use `str` instead of `string`.
+  - Use `bool` instead of `boolean`.
+  - Use `dict` instead of `dictionary`.
 
-* Square brackets should be used for the dictionary type. For example:
+- Square brackets should be used for the dictionary type. For example:
 
     ```
     my_var (dict[str, int]): Variable description.
     ```
 
-* If a variable has two different possible types, then the word `or` should be used without a comma. Otherwise variables with 3 or more types should use commas to separate the types. Example:
+- If a variable has two different possible types, then the word `or` should be used without a comma. Otherwise variables with 3 or more types should use commas to separate the types. Example:
 
     ```
     x (type1 or type2): Variable description.
     y (type1, type2, or type3): Variable description.
     ```
-
 
 ### Building documentation
 
@@ -467,6 +478,7 @@ pip install -r requirements.txt
 # Or if you prefer an uncontaminated global executable environment or do not want to go through the node configuration:
 # npm install katex && export PATH="$PATH:$(pwd)/node_modules/.bin"
 ```
+
 > Note: if you installed `nodejs` with a different package manager (e.g.,
 `conda`) then `npm` will probably install a version of `katex` that is not
 compatible with your version of `nodejs` and doc builds will fail.
@@ -474,12 +486,12 @@ A combination of versions that is known to work is `node@6.13.1` and
 `katex@0.13.18`. To install the latter with `npm` you can run
 ```npm install -g katex@0.13.18```
 
-
 > Note that if you are a Facebook employee using a devserver, yarn may be more convenient to install katex:
 
 ```bash
 yarn global add katex
 ```
+
 > If a specific version is required you can use for example `yarn global add katex@0.13.18`.
 
 3. Generate the documentation HTML files. The generated files will be in `docs/build/html`.
@@ -510,7 +522,7 @@ git add index.rst jit.rst
 
 #### Building C++ Documentation
 
-For C++ documentation (https://pytorch.org/cppdocs), we use
+For C++ documentation (<https://pytorch.org/cppdocs>), we use
 [Doxygen](http://www.doxygen.nl/) and then convert it to
 [Sphinx](http://www.sphinx-doc.org/) via
 [Breathe](https://github.com/michaeljones/breathe) and
@@ -701,7 +713,8 @@ a `compile_commands.json` file that can be used by many editors
 to provide command completion and error highlighting for PyTorch's
 C++ code. You need to `pip install ninja` to generate accurate
 information for the code in `torch/csrc`. More information at:
-- https://sarcasm.github.io/notes/dev/compilation-database.html
+
+- <https://sarcasm.github.io/notes/dev/compilation-database.html>
 
 ### Make no-op build fast
 
@@ -794,10 +807,12 @@ every `.cpp` file.
 
 One caveat is that when enabled, this header gets included in every file by default.
 Which may change what code is legal, for example:
+
 - internal functions can never alias existing names in `<ATen/ATen.h>`
 - names in `<ATen/ATen.h>` will work even if you don't explicitly include it.
 
 #### Workaround for header dependency bug in nvcc
+
 If re-building without modifying any files results in several CUDA files being
 re-compiled, you may be running into an `nvcc` bug where header dependencies are
 not converted to absolute paths before reporting it to the build system. This
@@ -806,6 +821,7 @@ build again.
 
 A compiler-wrapper to fix this is provided in `tools/nvcc_fix_deps.py`. You can use
 this as a compiler launcher, similar to `ccache`
+
 ```bash
 export CMAKE_CUDA_COMPILER_LAUNCHER="python;`pwd`/tools/nvcc_fix_deps.py;ccache"
 python setup.py develop
@@ -818,6 +834,7 @@ But often only a few files needs to be rebuild with debug info to get a symbolic
 One can easily solve this with the help of `tools/build_with_debinfo.py`
 
 For example, suppose one wants to debug what is going on while tensor index is selected, which can be achieved by setting a breakpoint at `applySelect` function:
+
 ```
 % lldb -o "b applySelect" -o "process launch" -- python3 -c "import torch;print(torch.rand(5)[3])"
 (lldb) target create "python"
@@ -839,13 +856,17 @@ libtorch_python.dylib`at::indexing::impl::applySelect:
 Target 0: (python) stopped.
 Process 87729 launched: '/usr/bin/python' (arm64)
 ```
+
 Which is not very informative, but can be easily remedied by rebuilding `python_variable_indexing.cpp` with debug information
+
 ```
 % ./tools/build_with_debinfo.py torch/csrc/autograd/python_variable_indexing.cpp
 [1 / 2] Building caffe2/torch/CMakeFiles/torch_python.dir/csrc/autograd/python_variable_indexing.cpp.o
 [2 / 2] Building lib/libtorch_python.dylib
 ```
+
 And afterwards:
+
 ```
 % lldb -o "b applySelect" -o "process launch" -- python3 -c "import torch;print(torch.rand(5)[3])"
 (lldb) target create "python"
@@ -869,6 +890,7 @@ Process 87741 stopped
 Target 0: (python) stopped.
 Process 87741 launched: '/usr/bin/python3' (arm64)
 ```
+
 Which is much more useful, isn't it?
 
 ### C++ frontend development tips
@@ -946,6 +968,7 @@ add-auto-load-safe-path /path/to/pytorch/.gdbinit
 ```
 
 ### C++ stacktraces
+
 Set `TORCH_SHOW_CPP_STACKTRACES=1` to get the C++ stacktrace when an error occurs in Python.
 
 ## CUDA development tips
@@ -967,6 +990,7 @@ If you are working on the CUDA code, here are some useful CUDA debugging tips:
    It is useful for you to measure this metric whenever you are writing/optimizing a CUDA
    kernel. Following script shows how we can measure the effective bandwidth of CUDA `uniform_`
    kernel.
+
    ```python
    import torch
    from torch.utils.benchmark import Timer
@@ -1006,7 +1030,7 @@ than Linux, which are worth keeping in mind when fixing these problems.
 
    The upshot is if you see an "unresolved external" error in your Windows build, this
    is probably because you forgot to mark a function with `*_API`. However, there is
-   one important counterexample to this principle: if you want a *templated* function
+   one important counterexample to this principle: if you want a _templated_ function
    to be instantiated at the call site, do NOT mark it with `*_API` (if you do mark it,
    you'll have to explicitly instantiate all of the specializations used by the call
    sites.)
@@ -1056,25 +1080,25 @@ We've found the most effective way to debug these problems is to
 carefully read over diffs, keeping in mind known bugs in MSVC/NVCC.
 Here are a few well known pitfalls and workarounds:
 
-* This is not actually a bug per se, but in general, code generated by MSVC
+- This is not actually a bug per se, but in general, code generated by MSVC
   is more sensitive to memory errors; you may have written some code
   that does a use-after-free or stack overflows; on Linux the code
   might work, but on Windows your program will crash. ASAN may not
   catch all of these problems: stay vigilant to the possibility that
   your crash is due to a real memory problem.
 
-* (NVCC) `c10::optional` does not work when used from device code. Don't use
-  it from kernels. Upstream issue: https://github.com/akrzemi1/Optional/issues/58
+- (NVCC) `c10::optional` does not work when used from device code. Don't use
+  it from kernels. Upstream issue: <https://github.com/akrzemi1/Optional/issues/58>
   and our local issue #10329.
 
-* `constexpr` generally works less well on MSVC.
+- `constexpr` generally works less well on MSVC.
 
-  * The idiom `static_assert(f() == f())` to test if `f` is constexpr
+  - The idiom `static_assert(f() == f())` to test if `f` is constexpr
     does not work; you'll get "error C2131: expression did not evaluate
     to a constant". Don't use these asserts on Windows.
     (Example: `c10/util/intrusive_ptr.h`)
 
-* (NVCC) Code you access inside a `static_assert` will eagerly be
+- (NVCC) Code you access inside a `static_assert` will eagerly be
   evaluated as if it were device code, and so you might get an error
   that the code is "not accessible".
 
@@ -1088,16 +1112,16 @@ class A {
 static_assert(std::is_same(A*, decltype(A::singleton()))::value, "hmm");
 ```
 
-* The compiler will run out of heap space if you attempt to compile files that
+- The compiler will run out of heap space if you attempt to compile files that
   are too large. Splitting such files into separate files helps.
   (Example: `THTensorMath`, `THTensorMoreMath`, `THTensorEvenMoreMath`.)
 
-* MSVC's preprocessor (but not the standard compiler) has a bug
+- MSVC's preprocessor (but not the standard compiler) has a bug
   where it incorrectly tokenizes raw string literals, ending when it sees a `"`.
   This causes preprocessor tokens inside the literal like an`#endif`  to be incorrectly
-  treated as preprocessor directives. See https://godbolt.org/z/eVTIJq as an example.
+  treated as preprocessor directives. See <https://godbolt.org/z/eVTIJq> as an example.
 
-* Either MSVC or the Windows headers have a PURE macro defined and will replace
+- Either MSVC or the Windows headers have a PURE macro defined and will replace
   any occurrences of the PURE token in code with an empty string. This is why
   we have AliasAnalysisKind::PURE_FUNCTION and not AliasAnalysisKind::PURE.
   The same is likely true for other identifiers that we just didn't try to use yet.
@@ -1126,23 +1150,28 @@ To run clang-tidy locally, follow these steps:
 
 1. Install clang-tidy.
 We provide custom built binaries which have additional checks enabled. You can install it by running:
+
 ```bash
 python3 -m tools.linter.clang_tidy.generate_build_files
 ```
+
 We currently only support Linux and MacOS (x86).
 
 2. Install clang-tidy driver script dependencies
+
 ```bash
 pip3 install -r tools/linter/clang_tidy/requirements.txt
 ```
 
 3. Run clang-tidy
+
 ```bash
 # Run clang-tidy on the entire codebase
 make clang-tidy
 # Run clang-tidy only on your changes
 make clang-tidy CHANGED_ONLY=--changed-only
 ```
+
 This internally invokes our driver script and closely mimics how clang-tidy is run on CI.
 
 ## Pre-commit tidy/linting hook
@@ -1297,7 +1326,6 @@ configurations. In this case, if you're a Meta employee, you can ssh into
 the job's session to perform manual debugging following the instructions in
 our [CI wiki](https://github.com/pytorch/pytorch/wiki/Debugging-using-with-ssh-for-Github-Actions).
 
-
 ### Which commit is used in CI?
 
 For CI run on `main`, this repository is checked out for a given `main`
@@ -1332,6 +1360,6 @@ PR and the `main` branch. But only the workflow files get taken from that merged
 checkpoint. Everything else (tests, code, etc) all get taken directly from your
 PR's commit (commit `B`). Please note, this scenario would never affect PRs authored by `ghstack` as they would not automatically ingest the updates from default branch.
 
-
 ## Dev Infra Office Hours
+
 [Dev Infra Office Hours](https://github.com/pytorch/pytorch/wiki/Dev-Infra-Office-Hours) are hosted every Friday to answer any questions regarding developer experience, Green HUD, and CI.

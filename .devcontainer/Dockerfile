@@ -11,7 +11,7 @@ RUN if [ -f "/tmp/conda-tmp/environment.yml" ]; then umask 0002 && /opt/conda/bi
 
 # Tools needed for llvm
 RUN sudo apt-get -y update
-RUN sudo apt install -y lsb-release wget software-properties-common gnupg clangd
+RUN sudo apt install -y lsb-release wget software-properties-common gnupg clangd libopenblas-dev
 
 # Install CLANG if version is specified
 ARG CLANG_VERSION
