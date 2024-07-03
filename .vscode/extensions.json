@@ -1,6 +1,9 @@
 {
   "recommendations": [
     "ms-python.python",
-    "omnilib.ufmt"
+    "omnilib.ufmt",
+    "xaver.clang-format",
+    "llvm-vs-code-extensions.vscode-clangd",
+    "mhutchie.git-graph"
   ]
 }

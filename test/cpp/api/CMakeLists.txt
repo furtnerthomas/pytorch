@@ -77,4 +77,4 @@ endif()
 
 add_executable(parallel_benchmark ${TORCH_API_TEST_DIR}/parallel_benchmark.cpp)
 target_include_directories(parallel_benchmark PRIVATE ${ATen_CPU_INCLUDE})
-target_link_libraries(parallel_benchmark PRIVATE torch)
+target_link_libraries(parallel_benchmark PRIVATE torch_cpu)

@@ -14,7 +14,7 @@ RUN sudo apt-get -y update
 RUN sudo apt install -y lsb-release wget software-properties-common gnupg 
 
 # Libraries needed for gcc build
-RUN sudo apt install -y libopenblas-dev liblapack-dev
+RUN sudo apt install -y libopenblas-dev liblapack-dev clangd clang-format
 
 # Install CLANG if version is specified
 ARG CLANG_VERSION

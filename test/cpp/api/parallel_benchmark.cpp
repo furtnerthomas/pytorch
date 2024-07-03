@@ -1,7 +1,10 @@
-#include <torch/torch.h>
+#include "ATen/Parallel.h"
+
 #include <chrono>
 #include <condition_variable>
+#include <iostream>
 #include <mutex>
+#include <vector>
 
 class Baton {
  public:
